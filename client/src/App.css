@@ -1,0 +1,60 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #fef3e6;
+}
+
+button {
+  font-size: 18px;
+  padding: 16px;
+  background-color: #1D4ED8;
+  color: white;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #3B82F6;
+}
+
+button:focus {
+  outline: none;
+}
+/* Style for the success notification message */
+.notification {
+  position: fixed;
+  top: 20px; /* Position it at the top */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffff; /* White background */
+  padding: 15px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  color: #333;
+  z-index: 1000; /* Ensure it's on top of other content */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out; /* Smooth transition for opacity */
+}
+
+.notification.visible {
+  opacity: 1; /* Make the notification visible */
+}
+
+.notification button {
+  background-color: #67d87e; /* A green color */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.notification button:hover {
+  background-color: #58c76d; /* Slightly darker green on hover */
+}
