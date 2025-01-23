@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import path, { dirname } from "path";
 import dotenv from "dotenv";
 import { fetchAccessToken } from "hume";
-import cors from "cors";  // Import cors middleware
+import cors from "cors"; 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
