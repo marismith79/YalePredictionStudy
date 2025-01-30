@@ -1,21 +1,11 @@
-.App {
-  text-align: right;
-  padding: 0;
-  margin: 0;
-  background-color: #fef3e6;
-}
-
-.page-header {
-  font-family: nanummyeongjo;
-  font-weight: bold;
+.full-height-container {
   display: flex;
   flex-direction: column;
-  text-align: left;
-  justify-content: center;
-  min-height: 10vh;
-  font-size: calc(10px + 2vmin);
-  color: rgb(0, 0, 0);
+  justify-content: center; 
+  align-items: center;     
+  height: 100vh;           
 }
+
 
 .page-contents {
   font-family: nanummyeongjo;
@@ -85,38 +75,6 @@
   justify-content: space-between;
 }
 
-.Header1 {
-  flex: 1;
-  height: 10vh;
-  width: 50%;
-  padding: 0 7%;
-  font-weight: 1000;
-  flex-direction: row;
-  text-align: left;
-  font-size: calc(10px + 2vmin);
-  color: rgb(33, 5, 5);
-  justify-content: center;
-}
-
-.Header2 {
-  flex: 2;
-  height: 10vh;
-  width: 50%;
-  padding: 0 7%;
-  text-align: right;
-  align-items: right;
-  list-style: none;
-  font-size: calc(10px + 2vmin);
-  color: rgb(33, 5, 5);
-  justify-content: right;
-}
-
-.nav {
-  width: 100%;
-  text-align: right;
-  align-items: right;
-
-}
 
 button {
   font-size: calc(10px + 2vmin);
@@ -127,8 +85,8 @@ button {
   background-color: transparent;
   color: rgb(0, 0, 0);
   cursor: pointer;
-  align-items: right;
-  text-align: right;
+  align-items: center;
+  text-align: center;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
@@ -142,102 +100,11 @@ button:focus {
   /* border-bottom: 2px solid #000000; */
 }
 
-
-.chat-container {
-  display: flex;
-  flex-direction: row;
-  width: 66.67%; /* This makes it take up 2/3 of the parent width */
-  margin: 10vw;
-}
-
 .logger-container {
-  flex: 1; /* This makes it take up 1 part of the available space */
+  flex: 1; 
   display: flex;
   flex-direction: column;
 }
-
-.message-container {
-  flex: 2; /* This makes it take up 2 parts of the available space */
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 80vh;
-  overflow-y: auto;
-  padding: 10px;
-  margin-bottom: 10px;
-  background: white;
-  border-radius: 8px;
-  border-top: 1px solid transparent;  /* Add this line */
-}
-
-
-/* Style for individual messages */
-.message {
-  background-color: #f1f1f1;
-  padding: 10px 15px;
-  border-radius: 15px;
-  max-width: 80%;
-  word-wrap: break-word;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.message.user {
-  background-color: #e1f5fe;
-  font-size: large;
-  align-self: flex-end;
-}
-
-.message.assistant {
-  background-color: #ffe1ffda; /* Light yellow for assistant messages */
-  font-size: large;
-  align-self: flex-start;
-}
-
-/* For message text */
-.message .role {
-  font-weight: bold;
-  font-size: 20px;
-}
-
-.message .content {
-  margin-top: 5px;
-}
-
-/* Scrollable container */
-.message-container {
-  overflow-y: auto;
-  padding: 0 15px;
-}
-
-/* Add this to your App.css */
-.glimmer-text {
-  position: relative;
-  display: inline-block;
-}
-
-.glimmer-text:hover {
-  background: linear-gradient(
-    120deg,
-    #000000 0%,
-    #444444 28%,
-    #ffffff 50%,
-    #444444 72%,
-    #000000 100%
-  );
-  background-size: 200% auto;
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: shine 2s linear infinite;
-}
-
-@keyframes shine {
-  to {
-    background-position: 200% center;
-  }
-}
-
 .section-card {
   background-color: rgba(94, 193, 132, 0.15); 
   border-radius: 8px;
@@ -265,4 +132,56 @@ button:focus {
   aspect-ratio: 1 / 1;            /* Ensure square shape */
   border-radius: 50%;             /* Circular shape */
   object-fit: cover;              /* Maintain image proportion while filling container */
+}
+
+.centered-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; 
+  width: 100%;
+}
+
+/* Container for the info icon and tooltip */
+.info-container {
+  padding-top: 10px;
+  position: absolute;     
+  bottom: 70%;             
+  left: 50%;               
+  /* transform: translateX(-50%); */
+  display: inline-block; 
+}  
+
+/* Style for the info icon */
+.info-icon {
+  font-size: 2rem;  /* Adjust the size */
+  cursor: pointer;
+  /* padding-top: 10px; */
+  position: relative;    /* Position the tooltip above the icon */
+  /* height: 80vh; */
+  color: #007bff; /* Change this to any color you prefer */
+}
+
+/* Tooltip text styling */
+.tooltip-text {
+  visibility: hidden;   /* Hidden by default */
+  width: 400px;          /* Set a fixed width for the tooltip */
+  background-color: rgba(0, 0, 0, 0.75);  /* Dark background */
+  color: #ffffff;           /* White text */
+  text-align: center;    /* Centered text */
+  padding: 5px;          /* Add some padding around the text */
+  border-radius: 5px;    /* Rounded corners */
+  position: absolute;    /* Position the tooltip above the icon */
+  z-index: 1;            /* Ensure the tooltip is on top */
+  bottom: 100%;          /* Place the tooltip above the icon */
+  left: 50%;             /* Center the tooltip horizontally */
+  transform: translateX(-50%); /* Adjust for perfect centering */
+  opacity: 0;           /* Make it invisible by default */
+  transition: opacity 0.3s; /* Fade effect */
+}
+
+/* Show tooltip when hovering over the icon */
+.info-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }

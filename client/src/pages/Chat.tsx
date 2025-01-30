@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { humeService } from "../humeService"; 
 import Controls from "../components/Controls";
 import StartCall from "../components/StartCall";
+import { Info } from "lucide-react";
 
 export default function Chat() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -27,12 +28,11 @@ export default function Chat() {
   }, []);
 
   return (
-    <div className="chat-container">
-      {/* <div id="chat">
-        {messages.map((message, index) => (
-          <ChatCard key={index} message={message} />
-        ))}
-      </div> */}
+    <div className="full-height-container">
+      <div className="info-container">
+        <Info className="info-icon" />
+        <span className="tooltip-text">Please complete the interview in one go. This recording will stop after 7 minutes. After you've completed your recordings, please enter your Prolific ID in the text block below.</span>
+      </div>
       <Controls onEndCall={handleEndCall} />
       <StartCall />
     </div>

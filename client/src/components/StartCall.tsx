@@ -1,17 +1,13 @@
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
-import { Phone } from "lucide-react";
+import { Mic } from "lucide-react";
 import { useHume } from '../hooks/useHume';
 
-
 export default function StartCall() {
-
-  const { 
-        connected, 
-        connect, 
-      } = useHume();
+  const { connected, connect } = useHume();
 
   console.log("StartCall connected:", connected);
+  
   return (
     <>
       {connected !== true && (
@@ -32,24 +28,25 @@ export default function StartCall() {
               exit: { scale: 0.5 },
             }}
           >
-            <Button
-              onClick={() => {
-                console.log(connected);
-                connect()
-                  .then(() => console.log(connected))
-                  .catch((error: any) => console.error("Connection error:", error))
-                  .finally(() => console.log("Connection attempt finished", connected));
-              }}
-            >
-              <span>
-                <Phone strokeWidth={2} stroke={"currentColor"} />
-              </span>
-              <span>Start Call</span>
-            </Button>
+            <div className="centered-button-container"> {/* Ensures centering */}
+              <Button
+                onClick={() => {
+                  console.log(connected);
+                  connect()
+                    .then(() => console.log(connected))
+                    .catch((error: any) => console.error("Connection error:", error))
+                    .finally(() => console.log("Connection attempt finished", connected));
+                }}
+              >
+                <span>
+                  <Mic strokeWidth={2} stroke={"currentColor"} />
+                </span>
+                <span>Start Interview</span>
+              </Button>
+            </div>
           </motion.div>
         </motion.div>
       )}
     </>
   );
 }
-
