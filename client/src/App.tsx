@@ -4,8 +4,8 @@ import axios from "axios";
 import { useState, CSSProperties } from "react";
 import { Route, Switch } from "wouter";
 import About from "./pages/About";
-import Chat from "./pages/Interview";
-// import { Header } from "./components/Header";
+import Chat from "./pages/Chat";
+import { Header } from "./components/Header";
 import { Body } from "./components/Home";
 
 function App() {
@@ -23,11 +23,11 @@ function App() {
 
   return (
     <div>
-      {/* <Header /> */}
+      <Header />
       <Switch>
-        {/* <Route path="/about" component={About} /> */}
-        <Route path="/interview" component={Chat} />
-        {/* <Route path="/home" component={Body} /> */}
+        <Route path="/about" component={About} />
+        <Route path="/chat" component={Chat} />
+        <Route path="/home" component={Body} />
       </Switch>
     </div>
   );
