@@ -148,7 +148,6 @@ button:focus {
   position: absolute;     
   bottom: 70%;             
   left: 50%;               
-  /* transform: translateX(-50%); */
   display: inline-block; 
 }  
 
@@ -156,6 +155,7 @@ button:focus {
 .info-icon {
   font-size: 2rem;  /* Adjust the size */
   cursor: pointer;
+  right: 50%;               
   /* padding-top: 10px; */
   position: relative;    /* Position the tooltip above the icon */
   /* height: 80vh; */
@@ -184,4 +184,10 @@ button:focus {
 .info-container:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
+}
+
+.elapsed-time {
+  margin-top: 10px;  
+  font-size: 1rem;   
+  color: #333;      
 }
