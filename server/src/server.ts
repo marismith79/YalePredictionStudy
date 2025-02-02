@@ -74,26 +74,16 @@ app.get("/api/getHumeAccessToken", async (req: Request, res: Response) => {
   }
 });
 
-// Adjust index.html path based on environment
-app.get("*", (req, res) => {
-  const indexPath = isProduction
-    ? path.join(__dirname, "../../../client/dist/index.html") // Azure path
-    : path.join(__dirname, "../../client/dist/index.html"); // Local path
+// In-memory allowed list of valid 10-digit IDs.
+const VALID_PROLIFIC_IDS = ["1234567890", "0987654321"]; // Replace with your own list
 
-  res.sendFile(indexPath);
-});
-
-// A simple array of allowed Prolific IDs (replace with your own logic or database)
-const VALID_PROLIFIC_IDS = ["1234567890", "0987654321"]; // example IDs
-
-// Middleware to verify JWT tokens on protected routes
+// Middleware to verify JWT on protected endpoints
 const authenticate = (req: Request, res: Response, next: Function) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: "No token provided" });
   const token = authHeader.split(" ")[1];
   jwt.verify(token, process.env.JWT_SECRET || "secret", (err, decoded) => {
     if (err) return res.status(401).json({ error: "Invalid token" });
-    // Attach the decoded token to req.user (if needed)
     (req as any).user = decoded;
     next();
   });
@@ -101,25 +91,43 @@ const authenticate = (req: Request, res: Response, next: Function) => {
 
 app.post("/api/login", (req: Request, res: Response) => {
   const { prolificId } = req.body;
-  // Check that the input is exactly 10 digits
   if (!prolificId || !/^\d{10}$/.test(prolificId)) {
     return res.status(400).json({ error: "Invalid Prolific ID format" });
   }
-  // Validate the ID against our allowed list
   if (!VALID_PROLIFIC_IDS.includes(prolificId)) {
     return res.status(401).json({ error: "Unauthorized Prolific ID" });
   }
-  // Create a JWT token (set a secret in your .env as JWT_SECRET)
+  // Issue a JWT for our app (JWT_SECRET should be set in .env)
   const token = jwt.sign({ prolificId }, process.env.JWT_SECRET || "secret", { expiresIn: "1h" });
   res.json({ token });
 });
 
-
+const serviceAccountUsername = process.env.SERVICE_ACCOUNT_USERNAME || "";
+const serviceAccountPassword = process.env.SERVICE_ACCOUNT_PASSWORD || "";
 const tenantId = process.env.TENANT_ID || ""; 
 const clientId = process.env.CLIENT_ID || ""; 
 const clientSecret = process.env.CLIENT_SECRET || ""; 
 
-// Microsoft Graph API authentication
+const getDelegatedAccessToken = async (): Promise<string> => {
+  const ropcRequest = {
+    scopes: ["https://graph.microsoft.com/.default"],
+    username: serviceAccountUsername,
+    password: serviceAccountPassword,
+  };
+
+  try {
+    const tokenResponse = await cca.acquireTokenByUsernamePassword(ropcRequest);
+    if (!tokenResponse || !tokenResponse.accessToken) {
+      throw new Error("Failed to acquire delegated token");
+    }
+    return tokenResponse.accessToken;
+  } catch (error) {
+    console.error("Error acquiring delegated token:", error);
+    throw error;
+  }
+};
+
+// Create an MSAL ConfidentialClientApplication instance (used also for ROPC)
 const cca = new msal.ConfidentialClientApplication({
   auth: {
     clientId: clientId,
@@ -128,40 +136,28 @@ const cca = new msal.ConfidentialClientApplication({
   },
 });
 
-const getAccessToken = async (): Promise<string> => {
-  const result = await cca.acquireTokenByClientCredential({
-    scopes: ["https://graph.microsoft.com/.default"],
-  });
-  if (!result) {
-    throw new Error("Failed to acquire access token");
-  }
-  return result.accessToken!;
-};
-
-app.post("/api/upload-audio", async (req: Request, res: Response) => {
+app.post("/api/upload-audio", authenticate, async (req: Request, res: Response) => {
   try {
-    const { audioData, fileName } = req.body; // Expecting base64 audio data and file name
+    const { audioData, fileName } = req.body; // base64 audio data and file name
+    // Obtain a delegated token using the service account (ROPC flow)
+    const accessToken = await getDelegatedAccessToken();
+    console.log("Delegated access token:", accessToken);
 
-    // 1. Authenticate and get the access token
-    const accessToken = await getAccessToken();
-    console.log("Access token:", accessToken);
-
-    // 2. Prepare the Microsoft Graph client with the access token
+    // Initialize the Graph client with the delegated token
     const client = Client.init({
       authProvider: (done) => {
-        done(null, accessToken); // Provide the access token to the client
+        done(null, accessToken);
       },
     });
 
-    // 3. Create a buffer from the base64 audio data
+    // Create a buffer from the base64 audio data
     const buffer = Buffer.from(audioData, "base64");
 
-    // 4. Upload the file to OneDrive
-    const uploadPath = `/users/shomari.smith@yale.edu/drive/root:/Documents/yalepredictionsurvey/${fileName}:/content`;
+    // Use the /me endpoint since the token is for the service account
+    const uploadPath = `/me/drive/root:/Documents/yalepredictionsurvey/${fileName}:/content`;
 
     const response = await client.api(uploadPath).put(buffer);
 
-    // 5. Respond to the frontend with the result
     res.json({
       success: true,
       message: "Audio uploaded successfully",
@@ -173,7 +169,21 @@ app.post("/api/upload-audio", async (req: Request, res: Response) => {
   }
 });
 
+// Serve the static files
+app.get("*", (req, res) => {
+  const indexPath = isProduction
+    ? path.join(__dirname, "../../../client/dist/index.html") // Azure path
+    : path.join(__dirname, "../../client/dist/index.html"); // Local path
+  res.sendFile(indexPath);
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}, env port is ${process.env.PORT}`);
   console.log(`clientId is ${process.env.CLIENT_ID}`);
 });
+
+/**
+ * Use a Service Account That Supports ROPC:
+Create (or designate) a service account that is exempt from MFA/conditional access challenges.
+This account should be configured in your Azure AD such that ROPC can successfully acquire a token.
+*/
