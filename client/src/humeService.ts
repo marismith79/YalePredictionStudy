@@ -245,6 +245,28 @@ class HumeService {
       // base64 encode audio data
       const encodedAudioData = await convertBlobToBase64(data);
 
+      // Get the token to save audio data to One Drive
+      const token = localStorage.getItem("token");
+
+      // Send the audio data to the backend for upload to OneDrive
+      const response = await fetch("http://localhost:3000/api/upload-audio", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          audioData: encodedAudioData,
+          fileName: "audio_recording.wav", // You can customize the file name
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Audio uploaded successfully!");
+      } else {
+        console.error("Failed to upload audio.");
+      }
+
       // define the audio_input message JSON
       const audioInput: Omit<Hume.empathicVoice.AudioInput, "type"> = {
         data: encodedAudioData,
