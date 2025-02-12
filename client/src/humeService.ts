@@ -239,16 +239,16 @@ class HumeService {
 
     // callback for when recorded chunk is available to be processed
     this.recorder.ondataavailable = async ({ data }) => {
-      // IF size of data is smaller than 1 byte then do nothing
+      // Skip if data is too small
       if (data.size < 1) return;
-
-      // base64 encode audio data
+    
+      // Base64 encode the audio data
       const encodedAudioData = await convertBlobToBase64(data);
-
-      // Get the token to save audio data to One Drive
+    
+      // Retrieve your app token (used for authentication)
       const token = localStorage.getItem("token");
-
-      // Send the audio data to the backend for upload to OneDrive
+    
+      // Send the audio data to the backend for upload to Azure Blob Storage
       const response = await fetch("http://localhost:3000/api/upload-audio", {
         method: "POST",
         headers: {
@@ -257,22 +257,20 @@ class HumeService {
         },
         body: JSON.stringify({
           audioData: encodedAudioData,
-          fileName: "audio_recording.wav", // You can customize the file name
+          fileName: "audio_recording.wav", // Customize as needed, e.g. include Prolific ID/timestamp
         }),
       });
-
+    
       if (response.ok) {
-        console.log("Audio uploaded successfully!");
+        console.log("Audio uploaded to Blob Storage successfully!");
       } else {
-        console.error("Failed to upload audio.");
+        console.error("Failed to upload audio to Blob Storage.");
       }
-
-      // define the audio_input message JSON
+    
+      // Prepare the audio input message for the Hume socket
       const audioInput: Omit<Hume.empathicVoice.AudioInput, "type"> = {
         data: encodedAudioData,
       };
-
-      // send audio_input message
       this.socket?.sendAudioInput(audioInput);
     };
 

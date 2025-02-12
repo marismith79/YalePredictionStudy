@@ -6,3 +6,5 @@ server/dist
 server/.env
 app.zip
 .env
+c:azurite/
+c:azuritedebug.log

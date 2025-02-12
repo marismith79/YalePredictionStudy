@@ -62,7 +62,7 @@ export default function Chat() {
       <div className="info-container">
         <Info className="info-icon" />
         <span className="tooltip-text">
-          Please complete the interview in one go. This recording will stop after 7 minutes. After you've completed your recordings, please enter your Prolific ID in the text block below.
+          Hello there! Just to let you know, this recording will terminate automatically after 7 minutes. Please complete each recording in one sitting and only press "End" once you are finished responding. Once you've finished recording, return to Prolific to verify completion. Thank you again for your time!
         </span>
       </div>
       <Controls onEndCall={handleEndCall} />

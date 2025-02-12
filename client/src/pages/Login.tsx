@@ -32,7 +32,7 @@ const Login: React.FC = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Login</h2>
+      <h2>Home</h2>
       <form onSubmit={handleSubmit}>
         <label>
           Prolific ID:

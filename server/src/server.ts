@@ -5,10 +5,8 @@ import path, { dirname } from "path";
 import dotenv from "dotenv";
 import { fetchAccessToken } from "hume";
 import cors from "cors";
-import axios from "axios";
-import { Client } from "@microsoft/microsoft-graph-client";
-import * as msal from "@azure/msal-node";
 import jwt from "jsonwebtoken";
+import { BlobServiceClient } from "@azure/storage-blob";
 
 const __filename = fileURLToPath(import.meta.url); 
 const __dirname = dirname(__filename);
@@ -102,70 +100,37 @@ app.post("/api/login", (req: Request, res: Response) => {
   res.json({ token });
 });
 
-const serviceAccountUsername = process.env.SERVICE_ACCOUNT_USERNAME || "";
-const serviceAccountPassword = process.env.SERVICE_ACCOUNT_PASSWORD || "";
-const tenantId = process.env.TENANT_ID || ""; 
-const clientId = process.env.CLIENT_ID || ""; 
-const clientSecret = process.env.CLIENT_SECRET || ""; 
-
-const getDelegatedAccessToken = async (): Promise<string> => {
-  const ropcRequest = {
-    scopes: ["https://graph.microsoft.com/.default"],
-    username: serviceAccountUsername,
-    password: serviceAccountPassword,
-  };
-
-  try {
-    const tokenResponse = await cca.acquireTokenByUsernamePassword(ropcRequest);
-    if (!tokenResponse || !tokenResponse.accessToken) {
-      throw new Error("Failed to acquire delegated token");
-    }
-    return tokenResponse.accessToken;
-  } catch (error) {
-    console.error("Error acquiring delegated token:", error);
-    throw error;
-  }
-};
-
-// Create an MSAL ConfidentialClientApplication instance (used also for ROPC)
-const cca = new msal.ConfidentialClientApplication({
-  auth: {
-    clientId: clientId,
-    authority: `https://login.microsoftonline.com/${tenantId}`,
-    clientSecret: clientSecret,
-  },
-});
-
 app.post("/api/upload-audio", authenticate, async (req: Request, res: Response) => {
   try {
-    const { audioData, fileName } = req.body; // base64 audio data and file name
-    // Obtain a delegated token using the service account (ROPC flow)
-    const accessToken = await getDelegatedAccessToken();
-    console.log("Delegated access token:", accessToken);
-
-    // Initialize the Graph client with the delegated token
-    const client = Client.init({
-      authProvider: (done) => {
-        done(null, accessToken);
-      },
-    });
-
-    // Create a buffer from the base64 audio data
+    const { audioData, fileName } = req.body; // Expect base64 audio data and file name
+    // Convert base64 data to a Buffer
     const buffer = Buffer.from(audioData, "base64");
 
-    // Use the /me endpoint since the token is for the service account
-    const uploadPath = `/me/drive/root:/Documents/yalepredictionsurvey/${fileName}:/content`;
+    // Get connection string and container name from environment variables
+    const blobConnectionString = process.env.BLOB_CONNECTION_STRING || "UseDevelopmentStorage=true";
+    const containerName = process.env.BLOB_CONTAINER || "recordings";
 
-    const response = await client.api(uploadPath).put(buffer);
+    // Create a BlobServiceClient
+    const blobServiceClient = BlobServiceClient.fromConnectionString(blobConnectionString);
+    // Get a container client (creates the container if it does not exist)
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    await containerClient.createIfNotExists();
+
+    // Create a BlockBlobClient using the provided file name
+    const blockBlobClient = containerClient.getBlockBlobClient(fileName);
+
+    // Upload the audio data as a block blob
+    const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length);
+    console.log("Upload block blob successfully, request ID:", uploadBlobResponse.requestId);
 
     res.json({
       success: true,
-      message: "Audio uploaded successfully",
-      data: response,
+      message: "Audio uploaded to Blob Storage successfully",
+      data: uploadBlobResponse,
     });
   } catch (error) {
-    console.error("Error uploading audio to OneDrive:", error);
-    res.status(500).json({ error: "Error uploading audio to OneDrive" });
+    console.error("Error uploading audio to Blob Storage:", error);
+    res.status(500).json({ error: "Error uploading audio to Blob Storage" });
   }
 });
 
@@ -179,7 +144,6 @@ app.get("*", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}, env port is ${process.env.PORT}`);
-  console.log(`clientId is ${process.env.CLIENT_ID}`);
 });
 
 /**

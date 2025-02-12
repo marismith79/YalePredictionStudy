@@ -2,3 +2,5 @@ node_modules/
 dist/
 coverage/
 .env
+c:azurite/
+c:azuritedebug.log
