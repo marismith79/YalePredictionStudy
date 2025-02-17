@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation } from "wouter";
 
+const apiUrl = process.env.VITE_API_URL;
+
 const Login: React.FC = () => {
   const [prolificId, setProlificId] = useState("");
   const [error, setError] = useState("");
@@ -9,7 +11,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
+      const response = await fetch(`${apiUrl}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prolificId }),

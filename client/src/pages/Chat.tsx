@@ -15,9 +15,9 @@ export default function Chat() {
 
   const handleEndCall = () => {
     console.log("Call ended");
-    humeService.disconnect();  // Disconnect when ending the call
-    setTimerActive(false); // Stop the timer
-    setInterviewEnded(true); // Mark interview as ended
+    humeService.disconnect(); 
+    setTimerActive(false); 
+    setInterviewEnded(true); 
   };
 
   // Subscribe to messages from HumeService

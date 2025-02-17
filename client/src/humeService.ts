@@ -9,6 +9,8 @@ import {
   MimeType,
 } from "hume";
 
+const apiUrl = process.env.VITE_API_URL;
+
 // Define types for your store state
 interface HumeState {
   connected: boolean;
@@ -153,7 +155,7 @@ class HumeService {
   private async getHumeAccessToken() {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/getHumeAccessToken"
+        `${apiUrl}/api/getHumeAccessToken`
       );
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
@@ -260,7 +262,7 @@ class HumeService {
       const fileName = `${prolificId}-${Date.now()}.wav`;
       
       // Send the concatenated recording to the backend for upload to Blob Storage
-      const response = await fetch("http://localhost:3000/api/upload-audio", {
+      const response = await fetch(`${apiUrl}/api/upload-audio`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

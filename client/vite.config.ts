@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import * as dotenv from 'dotenv';
+
+const apiUrl = process.env.VITE_API_URL;
 
 export default defineConfig({
   plugins: [react()],
@@ -14,12 +15,13 @@ export default defineConfig({
       __VITE_STADIA_API_KEY__: JSON.stringify(process.env.VITE_STADIA_API_KEY),
       __VITE_HUME_API_KEY__: JSON.stringify(process.env.VITE_HUME_API_KEY),
       __VITE_HUME_SECRET_KEY__: JSON.stringify(process.env.VITE_HUME_SECRET_KEY),
+      __VITE_API_URL__: JSON.stringify(process.env.VITE_API_URL),
     },
   },
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: apiUrl,
         changeOrigin: true
       }
     }

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 
+const apiUrl = process.env.VITE_API_URL;
+
 export default function Questionnaire() {
   const [yesorno, setYesorno] = useState("");
   const [diagnosis, setDiagnosis] = useState<string[]>([]);
@@ -56,7 +58,7 @@ export default function Questionnaire() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("http://localhost:3000/api/upload-questionnaire", {
+      const response = await fetch(`${apiUrl}/api/upload-questionnaire`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
