@@ -28,7 +28,7 @@ app.use(express.json({ limit: "50mb" }));
 
 // Enable CORS middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'https://yalepredictionsurvey.azurewebsites.net',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -110,7 +110,7 @@ app.post("/api/upload-audio", authenticate, async (req: Request, res: Response) 
 
     // Get connection string and container name from environment variables
     const blobConnectionString = process.env.BLOB_CONNECTION_STRING || "UseDevelopmentStorage=true";
-    const containerName = process.env.BLOB_CONTAINER || "recordings";
+    const containerName = process.env.BLOB_CONTAINER || "interviews + questionnaires";
 
     // Create a BlobServiceClient
     const blobServiceClient = BlobServiceClient.fromConnectionString(blobConnectionString);

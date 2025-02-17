@@ -10,12 +10,14 @@
     "deploy": " zip -r app.zip . && az webapp deploy --resource-group PredictionSurvey --name yalepredictionsurvey --src-path ./app.zip --type zip --async true"
   },
   "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^3.4.17",
     "typeface-nanum-myeongjo": "^1.1.13",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.7"
