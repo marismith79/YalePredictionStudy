@@ -1,4 +1,3 @@
-// import { access } from "fs";
 import {
   Hume,
   HumeClient,
@@ -9,7 +8,6 @@ import {
   getBrowserSupportedMimeType,
   MimeType,
 } from "hume";
-import { handleToolCallMessage } from "./tools/humeToolCall";
 
 // Define types for your store state
 interface HumeState {
@@ -52,7 +50,10 @@ class HumeStore {
 class HumeService {
   private static instance: HumeService;
   private store: HumeStore;
-  private messageListeners: Set<(message: any) => void> = new Set(); // To handle message events
+  private messageListeners: Set<(message: any) => void> = new Set();
+
+  // New property to accumulate all recorded chunks
+  private recordedChunks: Blob[] = [];
 
   // Method to add a listener for new messages
   public addMessageListener(listener: (message: any) => void): void {
@@ -92,7 +93,6 @@ class HumeService {
   /**
    * the current audio element to be played
    */
-
   private currentAudio: HTMLAudioElement | null = null;
 
   /**
@@ -118,8 +118,7 @@ class HumeService {
   /**
    * the config ID for our Hume configuration
    */
-
-  private configID = "3b2e59d1-9efc-4424-90bd-fa497a57bc57"
+  private configID = "4b58faaa-2ad3-4b9e-b42e-73fb55a37c81";
 
   /**
    * mime type supported by the browser the application is running in
@@ -179,7 +178,6 @@ class HumeService {
 
     // instantiates WebSocket and establishes an authenticated connection
     this.socket = await this.client.empathicVoice.chat.connect({
-      // configuration that includes the resource finder tool
       configId: this.configID,
       resumedChatGroupId: this.chatGroupId,
     });
@@ -194,61 +192,74 @@ class HumeService {
    * stops audio capture and playback, and closes the Web Socket connection
    */
   public disconnect(): void {
-    // stop audio playback
     this.stopAudio();
 
-    // stop audio capture
     if (this.recorder) {
-      this.recorder.stop();  // Stop the recorder
-      this.recorder = null;   // Clear the recorder instance
+      this.recorder.stop();  // This will trigger onstop to upload the final recording
+      this.recorder = null;
     }
   
     if (this.audioStream) {
-      // Stop all audio tracks to fully release the microphone
       this.audioStream.getTracks().forEach((track) => track.stop());
-      this.audioStream = null;  // Clear the audio stream
+      this.audioStream = null;
     }
   
-    // set connected state to false to prevent automatic reconnect
     this.getStore().setState({ connected: false });
-
-    // IF resumeChats flag is false, reset chatGroupId so a new conversation is started when reconnecting
+  
     if (!this.resumeChats) {
       this.chatGroupId = undefined;
     }
-
-    // closed the Web Socket connection
+  
     this.socket?.close();
-    this.socket = null; // Clear the socket instance
+    this.socket = null;
   }
 
   /**
-   * captures and records audio stream, and sends audio stream through the socket
+   * captures and records audio stream and sends audio stream through the socket in chunks.
+   * Simultaneously, it accumulates all chunks into an array for concatenation upon stopping.
    *
    * API Reference:
    * - `audio_input`: https://dev.hume.ai/reference/empathic-voice-interface-evi/chat/chat#send.Audio%20Input.type
    */
   private async captureAudio(): Promise<void> {
     this.audioStream = await getAudioStream();
-    // ensure there is only one audio track in the stream
     ensureSingleValidAudioTrack(this.audioStream);
-    let mimeType = this.mimeType;
+    const mimeType = this.mimeType;
 
-    // instantiate the media recorder
+    // Initialize the array to store chunks
+    this.recordedChunks = [];
+
+    // Instantiate the MediaRecorder with a timeslice (for real-time streaming)
     this.recorder = new MediaRecorder(this.audioStream, { mimeType });
 
-    // callback for when recorded chunk is available to be processed
+    // ondataavailable fires repeatedly with each time slice
     this.recorder.ondataavailable = async ({ data }) => {
-      // Skip if data is too small
       if (data.size < 1) return;
-    
-      // Base64 encode the audio data
-      const encodedAudioData = await convertBlobToBase64(data);
-    
-      // Retrieve your app token (used for authentication)
+      
+      // Accumulate each chunk for final concatenation
+      this.recordedChunks.push(data);
+      
+      // Also, send this chunk to the Hume socket for real-time processing
+      const encodedChunk = await convertBlobToBase64(data);
+      this.socket?.sendAudioInput({ data: encodedChunk });
+    };
+
+    // When the recording stops, concatenate all chunks and upload the final file.
+    this.recorder.onstop = async () => {
+      if (this.recordedChunks.length === 0) return;
+      
+      // Concatenate all chunks into one Blob
+      const completeBlob = new Blob(this.recordedChunks, { type: mimeType });
+      
+      // Convert the complete Blob to base64
+      const encodedCompleteAudio = await convertBlobToBase64(completeBlob);
+      
+      // Retrieve token and prolificId (if available)
       const token = localStorage.getItem("token");
-    
-      // Send the audio data to the backend for upload to Azure Blob Storage
+      const prolificId = localStorage.getItem("prolificId") || "unknown";
+      const fileName = `${prolificId}-${Date.now()}.wav`;
+      
+      // Send the concatenated recording to the backend for upload to Blob Storage
       const response = await fetch("http://localhost:3000/api/upload-audio", {
         method: "POST",
         headers: {
@@ -256,91 +267,61 @@ class HumeService {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-          audioData: encodedAudioData,
-          fileName: "audio_recording.wav", // Customize as needed, e.g. include Prolific ID/timestamp
+          audioData: encodedCompleteAudio,
+          fileName: fileName,
         }),
       });
-    
+      
       if (response.ok) {
-        console.log("Audio uploaded to Blob Storage successfully!");
+        console.log("Final concatenated recording uploaded to Blob Storage successfully!");
       } else {
-        console.error("Failed to upload audio to Blob Storage.");
+        console.error("Failed to upload final concatenated recording to Blob Storage.");
       }
-    
-      // Prepare the audio input message for the Hume socket
-      const audioInput: Omit<Hume.empathicVoice.AudioInput, "type"> = {
-        data: encodedAudioData,
-      };
-      this.socket?.sendAudioInput(audioInput);
     };
 
-    // capture audio input at a rate of 100ms (recommended)
+    // Start recording with a timeslice (e.g., 100ms) for socket streaming
     const timeSlice = 100;
     this.recorder.start(timeSlice);
   }
 
   /**
-   * play the audio within the playback queue, converting each Blob into playable HTMLAudioElements
+   * Plays audio from the playback queue by converting each Blob into an HTMLAudioElement.
    */
   private playAudio(): void {
-    // IF there is nothing in the audioQueue OR audio is currently playing then do nothing
     if (!this.audioQueue.length || this.isPlaying) return;
-
-    // update isPlaying state
     this.isPlaying = true;
-
-    // pull next audio output from the queue
     const audioBlob = this.audioQueue.shift();
-
-    // IF audioBlob is unexpectedly undefined then do nothing
     if (!audioBlob) return;
-
-    // converts Blob to AudioElement for playback
     const audioUrl = URL.createObjectURL(audioBlob);
     this.currentAudio = new Audio(audioUrl);
-
-    // play audio
     this.currentAudio.play();
-
-    // callback for when audio finishes playing
     this.currentAudio.onended = () => {
-      // update isPlaying state
       this.isPlaying = false;
-
-      // attempt to pull next audio output from queue
       if (this.audioQueue.length) this.playAudio();
     };
   }
 
   /**
-   * stops audio playback, clears audio playback queue, and updates audio playback state
+   * Stops audio playback and clears the playback queue.
    */
   private stopAudio(): void {
-    // stop the audio playback
     this.currentAudio?.pause();
     this.currentAudio = null;
-
-    // update audio playback state
     this.isPlaying = false;
-
-    // clear the audioQueue
     this.audioQueue.length = 0;
   }
 
   /**
-   * callback function to handle a WebSocket opened event
+   * Callback for handling WebSocket open event.
    */
   private async handleWebSocketOpenEvent(): Promise<void> {
-    /* place logic here which you would like invoked when the socket opens */
     console.log("Web socket connection opened");
-
-    // ensures socket will reconnect if disconnected unintentionally
     this.getStore().setState({ connected: true });
     await this.captureAudio();
   }
 
   /**
-   * callback function to handle a WebSocket message event
+   * Callback for handling WebSocket message event.
    *
    * API Reference:
    * - `chat_metadata`: https://dev.hume.ai/reference/empathic-voice-interface-evi/chat/chat#receive.Chat%20Metadata.type
@@ -348,193 +329,137 @@ class HumeService {
    * - `assistant_message`: https://dev.hume.ai/reference/empathic-voice-interface-evi/chat/chat#receive.Assistant%20Message.type
    * - `audio_output`: https://dev.hume.ai/reference/empathic-voice-interface-evi/chat/chat#receive.Audio%20Output.type
    * - `user_interruption`: https://dev.hume.ai/reference/empathic-voice-interface-evi/chat/chat#receive.User%20Interruption.type
-   * - `tool_call`: https://dev.hume.ai/reference/empathic-voice-interface-evi/chat/chat#receive.Tool%20Call%20Message.type
    */
-  private async handleWebSocketMessageEvent(
-    message: Hume.empathicVoice.SubscribeEvent
-  ): Promise<void> {
-    /* place logic here which you would like to invoke when receiving a message through the socket */
+  private async handleWebSocketMessageEvent(message: Hume.empathicVoice.SubscribeEvent): Promise<void> {
     console.log(message);
-      // Validate the message structure
-    
-    // handle messages received through the WebSocket (messages are distinguished by their "type" field.)
     switch (message.type) {
-      // save chat_group_id to resume chat if disconnected
       case "chat_metadata":
         this.chatGroupId = message.chatGroupId;
         break;
-
-      // append user and assistant messages to UI for chat visibility
       case "user_message":
       case "assistant_message":
         const { role, content } = message.message;
         const topThreeEmotions = this.extractTopThreeEmotions(message);
         this.appendMessage(role, content ?? "", topThreeEmotions);
         break;
-
-      // add received audio to the playback queue, and play next audio output
       case "audio_output":
-        // convert base64 encoded audio to a Blob
         const audioOutput = message.data;
         const blob = convertBase64ToBlob(audioOutput, this.mimeType);
-
-        // add audio Blob to audioQueue
         this.audioQueue.push(blob);
-
-        // play the next audio output
         if (this.audioQueue.length >= 1) this.playAudio();
         break;
-
-      // stop audio playback, clear audio playback queue, and update audio playback state on interrupt
       case "user_interruption":
         this.stopAudio();
-        break;
-
-      // invoke tool upon receiving a tool_call message
-      case "tool_call":
-        handleToolCallMessage(message, this.socket);
         break;
     }
     this.broadcastMessage(message);
   }
 
   /**
-   * callback function to handle a WebSocket error event
+   * Callback for handling WebSocket error event.
    */
   private handleWebSocketErrorEvent(error: Error): void {
-    /* place logic here which you would like invoked when receiving an error through the socket */
     console.error(error);
   }
 
   /**
-   * callback function to handle a WebSocket closed event
+   * Callback for handling WebSocket closed event.
    */
   private async handleWebSocketCloseEvent(): Promise<void> {
-    /* place logic here which you would like invoked when the socket closes */
-
-    // reconnect to the socket if disconnect was unintentional
     if (this.getStore().getState().connected) await this.connect();
-
     console.log("Web socket connection closed");
   }
 
   /**
-   * adds message to Chat in the webpage's UI
-   *
-   * @param role the speaker associated with the audio transcription
-   * @param content transcript of the audio
-   * @param topThreeEmotions the top three emotion prediction scores for the message
+   * Appends a chat message to the UI.
    */
-  
-    // Function to append the message to the UI with emotion scores
-    private appendMessage(
-      role: Hume.empathicVoice.Role,
-      content: string,
-      topThreeEmotions: { emotion: string; score: any }[]
-    ): void {
-      // generate chat card component with message content and emotion scores
-      const chatCard = new ChatCard({
-        role,
-        timestamp: new Date().toLocaleTimeString(),
-        content,
-        scores: topThreeEmotions,
-      });
-  
-      // append chat card to the UI
-      const chat = document.querySelector<HTMLDivElement>("div#chat");
-      chat?.appendChild(chatCard.render());
-  
-      // scroll to the bottom to view most recently added message
-      if (chat) chat.scrollTop = chat.scrollHeight;
-    }
-  
-    // Function to extract the top 3 emotions from a message
-    private extractTopThreeEmotions(
-      message:
-        | Hume.empathicVoice.UserMessage
-        | Hume.empathicVoice.AssistantMessage
-    ): { emotion: string; score: string }[] {
-      // extract emotion scores from the message
-      const scores = message.models.prosody?.scores;
-  
-      // convert the emotions object into an array of key-value pairs
-      const scoresArray = Object.entries(scores || {});
-  
-      // sort the array by the values in descending order
-      scoresArray.sort((a, b) => b[1] - a[1]);
-  
-      // extract the top three emotions and convert them back to an object
-      const topThreeEmotions = scoresArray
-        .slice(0, 3)
-        .map(([emotion, score]) => ({
-          emotion,
-          score: (Math.round(Number(score) * 100) / 100).toFixed(2),
-        }));
-  
-      return topThreeEmotions;
-    }
-  }
-    /**
-   * The code below does not pertain to the EVI implementation, and only serves to style the UI.
-   */
-
-  interface Score {
-    emotion: string;
-    score: string;
+  private appendMessage(
+    role: Hume.empathicVoice.Role,
+    content: string,
+    topThreeEmotions: { emotion: string; score: any }[]
+  ): void {
+    const chatCard = new ChatCard({
+      role,
+      timestamp: new Date().toLocaleTimeString(),
+      content,
+      scores: topThreeEmotions,
+    });
+    const chat = document.querySelector<HTMLDivElement>("div#chat");
+    chat?.appendChild(chatCard.render());
+    if (chat) chat.scrollTop = chat.scrollHeight;
   }
 
-  interface ChatMessage {
-    role: Hume.empathicVoice.Role;
-    timestamp: string;
-    content: string;
-    scores: Score[];
+  /**
+   * Extracts the top three emotion scores from a message.
+   */
+  private extractTopThreeEmotions(
+    message: Hume.empathicVoice.UserMessage | Hume.empathicVoice.AssistantMessage
+  ): { emotion: string; score: string }[] {
+    const scores = message.models.prosody?.scores;
+    const scoresArray = Object.entries(scores || {});
+    scoresArray.sort((a, b) => b[1] - a[1]);
+    return scoresArray.slice(0, 3).map(([emotion, score]) => ({
+      emotion,
+      score: (Math.round(Number(score) * 100) / 100).toFixed(2),
+    }));
   }
-  
-  class ChatCard {
-    public message: ChatMessage;
-  
-    constructor(message: ChatMessage) {
-      this.message = message;
-    }
-  
-    private createScoreItem(score: Score): HTMLElement {
-      const scoreItem = document.createElement('div');
-      scoreItem.className = 'score-item';
-      scoreItem.innerHTML = `${score.emotion}: <strong>${score.score}</strong>`;
-      return scoreItem;
-    }
-  
-    public render(): HTMLElement {
-      const card = document.createElement('div');
-      card.className = `chat-card ${this.message.role}`;
-  
-      const role = document.createElement('div');
-      role.className = 'role';
-      role.textContent =
-        this.message.role.charAt(0).toUpperCase() + this.message.role.slice(1);
-  
-      const timestamp = document.createElement('div');
-      timestamp.className = 'timestamp';
-      timestamp.innerHTML = `<strong>${this.message.timestamp}</strong>`;
-  
-      const content = document.createElement('div');
-      content.className = 'content';
-      content.textContent = this.message.content;
-  
-      const scores = document.createElement('div');
-      scores.className = 'scores';
-      this.message.scores.forEach((score) => {
-        scores.appendChild(this.createScoreItem(score));
-      });
-  
-      card.appendChild(role);
-      card.appendChild(timestamp);
-      card.appendChild(content);
-      card.appendChild(scores);
-  
-      return card;
-    }
+}
+
+interface Score {
+  emotion: string;
+  score: string;
+}
+
+interface ChatMessage {
+  role: Hume.empathicVoice.Role;
+  timestamp: string;
+  content: string;
+  scores: Score[];
+}
+
+class ChatCard {
+  public message: ChatMessage;
+
+  constructor(message: ChatMessage) {
+    this.message = message;
   }
-  
-  export const humeService = HumeService.getInstance();
-  
+
+  private createScoreItem(score: Score): HTMLElement {
+    const scoreItem = document.createElement("div");
+    scoreItem.className = "score-item";
+    scoreItem.innerHTML = `${score.emotion}: <strong>${score.score}</strong>`;
+    return scoreItem;
+  }
+
+  public render(): HTMLElement {
+    const card = document.createElement("div");
+    card.className = `chat-card ${this.message.role}`;
+
+    const role = document.createElement("div");
+    role.className = "role";
+    role.textContent =
+      this.message.role.charAt(0).toUpperCase() + this.message.role.slice(1);
+
+    const timestamp = document.createElement("div");
+    timestamp.className = "timestamp";
+    timestamp.innerHTML = `<strong>${this.message.timestamp}</strong>`;
+
+    const content = document.createElement("div");
+    content.className = "content";
+    content.textContent = this.message.content;
+
+    const scores = document.createElement("div");
+    scores.className = "scores";
+    this.message.scores.forEach((score) => {
+      scores.appendChild(this.createScoreItem(score));
+    });
+
+    card.appendChild(role);
+    card.appendChild(timestamp);
+    card.appendChild(content);
+    card.appendChild(scores);
+    return card;
+  }
+}
+
+export const humeService = HumeService.getInstance();

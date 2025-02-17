@@ -49,7 +49,7 @@ export default function StartCall({ onStartCall }: StartProp) {
                 <span>
                   <Phone strokeWidth={2} stroke={"currentColor"} />
                 </span>
-                <span>Start Call</span>
+                <span>Start Interview</span>
               </Button>
             </div>
           </motion.div>

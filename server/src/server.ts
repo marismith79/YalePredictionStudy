@@ -24,13 +24,13 @@ dotenv.config();
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 
 // Enable CORS middleware
 app.use(cors({
-  origin: 'http://localhost:5173',  // Allow requests from your frontend
-  methods: ['GET', 'POST'],  // Allow only GET and POST methods
-  allowedHeaders: ['Content-Type', 'Authorization'],  // Allow specific headers
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Adjust static file path based on environment
@@ -72,7 +72,6 @@ app.get("/api/getHumeAccessToken", async (req: Request, res: Response) => {
   }
 });
 
-// In-memory allowed list of valid 10-digit IDs.
 const VALID_PROLIFIC_IDS = ["1234567890", "0987654321"]; // Replace with your own list
 
 // Middleware to verify JWT on protected endpoints
@@ -102,8 +101,11 @@ app.post("/api/login", (req: Request, res: Response) => {
 
 app.post("/api/upload-audio", authenticate, async (req: Request, res: Response) => {
   try {
-    const { audioData, fileName } = req.body; // Expect base64 audio data and file name
-    // Convert base64 data to a Buffer
+    const { audioData } = req.body;
+    const user = (req as any).user;
+    const prolificId = user.prolificId;
+    const fileName = `${prolificId}-1.wav`;
+
     const buffer = Buffer.from(audioData, "base64");
 
     // Get connection string and container name from environment variables
@@ -112,7 +114,6 @@ app.post("/api/upload-audio", authenticate, async (req: Request, res: Response) 
 
     // Create a BlobServiceClient
     const blobServiceClient = BlobServiceClient.fromConnectionString(blobConnectionString);
-    // Get a container client (creates the container if it does not exist)
     const containerClient = blobServiceClient.getContainerClient(containerName);
     await containerClient.createIfNotExists();
 
@@ -134,6 +135,36 @@ app.post("/api/upload-audio", authenticate, async (req: Request, res: Response) 
   }
 });
 
+app.post("/api/upload-questionnaire", authenticate, async (req: Request, res: Response) => {
+  try {
+    const { responses } = req.body; 
+    const user = (req as any).user;
+    const prolificId = user.prolificId;
+    const finalFileName = `${prolificId}-questionnaire.csv`;
+    const buffer = Buffer.from(responses, "utf-8");
+    const blobConnectionString = process.env.BLOB_CONNECTION_STRING || "UseDevelopmentStorage=true";
+    const containerName = process.env.BLOB_CONTAINER || "recordings"; 
+
+    const blobServiceClient = BlobServiceClient.fromConnectionString(blobConnectionString);
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    await containerClient.createIfNotExists();
+
+    const blockBlobClient = containerClient.getBlockBlobClient(finalFileName);
+
+    // Upload the CSV data as a block blob
+    const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length);
+    console.log("Questionnaire uploaded successfully, request ID:", uploadBlobResponse.requestId);
+    res.json({
+      success: true,
+      message: "Questionnaire uploaded successfully",
+      data: uploadBlobResponse,
+    });
+  } catch (error) {
+    console.error("Error uploading questionnaire:", error);
+    res.status(500).json({ error: "Error uploading questionnaire" });
+  }
+});
+
 // Serve the static files
 app.get("*", (req, res) => {
   const indexPath = isProduction
@@ -145,9 +176,3 @@ app.get("*", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}, env port is ${process.env.PORT}`);
 });
-
-/**
- * Use a Service Account That Supports ROPC:
-Create (or designate) a service account that is exempt from MFA/conditional access challenges.
-This account should be configured in your Azure AD such that ROPC can successfully acquire a token.
-*/

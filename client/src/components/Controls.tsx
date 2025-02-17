@@ -1,4 +1,3 @@
-import { useVoice } from "@humeai/voice-react";
 import { Button } from "./ui/button";
 import { Mic } from "lucide-react";
 import { motion } from "framer-motion";
@@ -14,7 +13,7 @@ export default function Controls({ onEndCall }: ControlsProps) {
     disconnect, 
   } = useHume();
 
-  console.log("Controls connected:", connected);
+  // console.log("Controls connected:", connected);
 
   return (
     <div>
@@ -35,7 +34,7 @@ export default function Controls({ onEndCall }: ControlsProps) {
             <span>
               <Mic className={"size-4 opacity-50"} strokeWidth={2} stroke={"currentColor"} />
             </span>
-            <span>End Call</span>
+            <span>End Interview</span>
           </Button>
         </motion.div>
       )}

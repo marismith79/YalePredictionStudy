@@ -2,18 +2,22 @@ import { useEffect, useState } from "react";
 import { humeService } from "../humeService"; 
 import Controls from "../components/Controls";
 import StartCall from "../components/StartCall";
-import { Info } from "lucide-react";
+import { Info, ArrowDown } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Chat() {
   const [messages, setMessages] = useState<any[]>([]);
   const [startTime, setStartTime] = useState<number | null>(null); // For tracking the start time
   const [elapsedTime, setElapsedTime] = useState(0); // Elapsed time in seconds
   const [timerActive, setTimerActive] = useState(false); // To track if the timer is running
+  const [interviewEnded, setInterviewEnded] = useState(false); // To track if the interview has ended
+  const [, setLocation] = useLocation();
 
   const handleEndCall = () => {
     console.log("Call ended");
     humeService.disconnect();  // Disconnect when ending the call
     setTimerActive(false); // Stop the timer
+    setInterviewEnded(true); // Mark interview as ended
   };
 
   // Subscribe to messages from HumeService
@@ -24,17 +28,20 @@ export default function Chat() {
   useEffect(() => {
     // Add the message listener when component mounts
     humeService.addMessageListener(messageListener);
-
     // Cleanup listener when component unmounts
     return () => {
       humeService.removeMessageListener(messageListener);
     };
   }, []);
 
-  // Start the timer when the call starts
   const handleStartCall = () => {
     setStartTime(Date.now());  // Record the start time
     setTimerActive(true);       // Start the timer
+  };
+
+  // New handler for the questionnaire button
+  const handleStartQuestionnaire = () => {
+    setLocation("/questionnaire");
   };
 
   // Update elapsed time every second when the timer is active
@@ -45,7 +52,6 @@ export default function Chat() {
         setElapsedTime(Math.floor((Date.now() - startTime) / 1000)); // Update the elapsed time
       }, 1000);
     }
-
     // Cleanup the interval when the timer is not active
     return () => clearInterval(timer);
   }, [timerActive, startTime]);
@@ -67,7 +73,15 @@ export default function Chat() {
       </div>
       <Controls onEndCall={handleEndCall} />
       <StartCall onStartCall={handleStartCall} />
-            {/* Elapsed time display */}
+      <div className="arrow-container" style={{ textAlign: "center" }}>
+            <ArrowDown size={48} />
+      </div>
+      {interviewEnded && (
+        <button onClick={handleStartQuestionnaire} style={{ marginBottom: "500px" }}>
+          Start Questionnaire
+        </button>
+      )}
+      {/* Elapsed time display */}
       {timerActive && startTime !== null && (
         <div className="elapsed-time">
           <p>Time: {formatElapsedTime(elapsedTime)}</p>

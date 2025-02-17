@@ -1,4 +1,3 @@
-// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { useLocation } from "wouter";
 
@@ -31,8 +30,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Home</h2>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", flexDirection: "column" }}>
       <form onSubmit={handleSubmit}>
         <label>
           Prolific ID:
