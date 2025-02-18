@@ -47,3 +47,5 @@ npm run dev
 
 <h2>Limitation</h2>
 i was not able to map "/" because then localhost:3000/ is used
+
+<h2>curl -X POST https://yalepredictionsurvey.scm.azurewebsites.net/api/deployments/stop</h2>
