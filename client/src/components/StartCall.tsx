@@ -10,8 +10,7 @@ interface StartProp {
 export default function StartCall({ onStartCall }: StartProp) {
   const { 
     connected, 
-    connect,    
-    disconnect, 
+    connect,
   } = useHume();
 
   return (

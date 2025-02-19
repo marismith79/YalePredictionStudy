@@ -35,28 +35,25 @@ export default function Chat() {
   }, []);
 
   const handleStartCall = () => {
-    setStartTime(Date.now());  // Record the start time
-    setTimerActive(true);       // Start the timer
+    setStartTime(Date.now());  
+    setTimerActive(true);       
   };
 
-  // New handler for the questionnaire button
   const handleStartQuestionnaire = () => {
     setLocation("/questionnaire");
   };
 
-  // Update elapsed time every second when the timer is active
+  
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (timerActive && startTime !== null) {
       timer = setInterval(() => {
-        setElapsedTime(Math.floor((Date.now() - startTime) / 1000)); // Update the elapsed time
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000)); 
       }, 1000);
     }
-    // Cleanup the interval when the timer is not active
     return () => clearInterval(timer);
   }, [timerActive, startTime]);
 
-  // Format elapsed time into mm:ss format
   const formatElapsedTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -64,24 +61,25 @@ export default function Chat() {
   };
 
   return (
-    <div className="full-height-container">
+    <div>
       <div className="info-container">
         <Info className="info-icon" />
         <span className="tooltip-text">
-          Hello there! Just to let you know, this recording will terminate automatically after 7 minutes. Please complete each recording in one sitting and only press "End" once you are finished responding. Once you've finished recording, return to Prolific to verify completion. Thank you again for your time!
+          This recording will terminate automatically after 5 minutes. Please complete each recording in one sitting and only press "End" once you are finished responding. Once you've finished recording, return to Prolific to verify completion. Thank you again for your time!
         </span>
       </div>
       <Controls onEndCall={handleEndCall} />
       <StartCall onStartCall={handleStartCall} />
       <div className="arrow-container" style={{ textAlign: "center" }}>
-            <ArrowDown size={48} />
+            <ArrowDown size={40} />
       </div>
       {interviewEnded && (
-        <button onClick={handleStartQuestionnaire} style={{ marginBottom: "500px" }}>
-          Start Questionnaire
-        </button>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "500px" }}>
+          <button onClick={handleStartQuestionnaire}>
+            Start Questionnaire
+          </button>
+        </div>
       )}
-      {/* Elapsed time display */}
       {timerActive && startTime !== null && (
         <div className="elapsed-time">
           <p>Time: {formatElapsedTime(elapsedTime)}</p>

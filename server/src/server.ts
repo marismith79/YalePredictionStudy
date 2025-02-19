@@ -21,8 +21,8 @@ const envPath = isProduction
 
 dotenv.config();
 
-// const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const PORT = 8080;
+// const PORT = "3000";
 const app = express();
 
 app.use(express.json({ limit: "50mb" }));
@@ -30,6 +30,7 @@ app.use(express.json({ limit: "50mb" }));
 // Enable CORS middleware
 app.use(cors({
   origin: 'https://yalepredictionsurvey.azurewebsites.net',
+  // origin: 'http://localhost:5173',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -177,3 +178,7 @@ app.get("*", (req, res) => {
 app.listen(PORT,'0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}, env port is ${process.env.PORT}`);
 });
+
+// app.listen(PORT, () => {
+//   console.log(`Server running on http://localhost:${PORT}, env port is ${process.env.PORT}`);
+// });

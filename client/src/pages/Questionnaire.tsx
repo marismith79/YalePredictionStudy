@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 
 const apiUrl = `https://yalepredictionsurvey.azurewebsites.net/`;
+// const apiUrl = `http://localhost:3000`;
 
 export default function Questionnaire() {
   const [yesorno, setYesorno] = useState("");

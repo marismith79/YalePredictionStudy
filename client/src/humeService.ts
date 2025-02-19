@@ -10,6 +10,7 @@ import {
 } from "hume";
 
 const apiUrl = `https://yalepredictionsurvey.azurewebsites.net`;
+// const apiUrl = `http://localhost:3000`;
 
 // Define types for your store state
 interface HumeState {

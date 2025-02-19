@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from "wouter";
 
 const apiUrl = `https://yalepredictionsurvey.azurewebsites.net/`
+// const apiUrl = `http://localhost:3000`;
 
 const Login: React.FC = () => {
   const [prolificId, setProlificId] = useState("");
@@ -35,7 +36,7 @@ const Login: React.FC = () => {
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", flexDirection: "column" }}>
       <form onSubmit={handleSubmit}>
         <label>
-          Prolific ID:
+          Please enter your Prolific ID:
           <input
             type="text"
             value={prolificId}

@@ -1,35 +1,54 @@
-.full-height-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center; 
-  align-items: center;     
-  height: 100vh;           
+.App {
+  text-align: right;
+  padding: 0;
+  margin: 0;
+  background-color: #fef3e6;
 }
 
+.page-header {
+  font-family: nanummyeongjo;
+  font-weight: bold;
+  margin-top: 0%;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  justify-content: center;
+  min-height: 10vh;
+  font-size: calc(12px + 2.5vmin);
+  color: rgb(0, 0, 0);
+}
 
-.page-contents {
+.page-content {
   font-family: nanummyeongjo;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 90vh;
+  text-align: left;
+  font-size: calc(7px + 2vmin);
   position: relative;
 }
 
 .section-container {
-  width: 100%;
-  max-width: 90vw;
-  margin: 0 auto;
-  padding: 20px 20px 20px 20px;
-  border-radius: 8px;
+  border-bottom: #000;
   position: relative;
 }
 
 .company-name {
   text-decoration: none;
-  color: black;
+  color: rgb(255, 255, 255);
 }
+
+.company-slogan {
+  font-size: calc(14px + 3vmin);
+  text-align: center;
+  color: rgb(255, 255, 255);
+  margin-top: 5vh;
+}
+
+.company-sub-slogan {
+  color: rgb(255, 255, 255);
+  margin-left: 10vh;
+}
+
 .App-logo {
   pointer-events: none;
   background-color: transparent;
@@ -48,26 +67,73 @@
   }
 }
 
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .App-header {
   background-color: #fef3e6;
+  margin-bottom: 100px;
   min-height: 2vh;
   display: flex;
   flex-direction: column;
   text-align: center;
   justify-content: top;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(10px + 3vmin);
   color: rgb(33, 5, 5);
 }
 
 .header-container {
-  background-color: #5EC184;
+  background-color: #00356b;
   display: flex;
   width: 100%;
-  justify-content: space-between;
+  justify-content: center; /* Center the content horizontally */
+  border-bottom: 0.5px solid #000; /* Add this line for a thin bottom border */
 }
 
+.Header1 {
+  flex: 1;
+  height: 10vh;
+  width: 50%;
+  padding: 0 7%;
+  font-weight: 1000;
+  flex-direction: row;
+  font-size: calc(2px + 2vmin);
+  color: rgb(33, 5, 5);
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 10vh;
+  color:rgb(255, 255, 255)
+}
 
-button {
+.Header2 {
+  flex: 2;
+  height: 10vh;
+  width: 50%;
+  padding: 0 7%;
+  text-align: right;
+  align-items: right;
+  list-style: none;
+  font-size: calc(10px + 2vmin);
+  color: rgb(255, 255, 255);
+  justify-content: right;
+}
+
+.nav {
+  width: 100%;
+  text-align: right;
+  align-items: right;
+  color: rgb(255, 255, 255)
+}
+
+button{
   font-size: calc(10px + 2vmin);
   font-family: nanummyeongjo;
   font-weight: bold;
@@ -76,99 +142,299 @@ button {
   background-color: transparent;
   color: rgb(0, 0, 0);
   cursor: pointer;
-  align-items: center;
-  text-align: center;
+  align-items: right;
+  text-align: right;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-button:active {
+button:active{
   /* border-bottom: 2px solid #000000; */
   transform: scale(1);
 }
 
-button:focus {
+button:focus{
   outline: none;
   /* border-bottom: 2px solid #000000; */
 }
 
-.section-card {
-  background-color: rgba(94, 193, 132, 0.15); 
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/************************************************************* STYLES FOR CHAT MESSGAES *************************************************************/
+/* Invisible container holding chat, analytics, and sentiment */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%; 
+  margin-top: 10px;
+  position: relative;
+}
+
+/* Ensure chat-container and analytics-container are the same height */
+.chat-container, .analytics-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 50vh; 
+  margin-top: 1vh;
+  margin-bottom: 1vh;
+  border-radius: 21px;
+  border: 0.5px solid #8f8f8f;
+}
+
+/* Styling for sentiment-container */
+.sentiment-container {
+  background-color: #f0f0f0;
+  padding: 2vh;
+  margin-top: 5vh;
+  margin-left: 20vh;
+  margin-right: 20vh;
+  height: 20vh;
+  border: 1px solid #8f8f8f;
+  border-radius: 21px;
+}
+
+.chat-container {
+  background-color: #fefefe;
+  margin-left: 20vh; 
+  display: flex;
+  position: relative;
+  justify-content: center;  
+  align-items: center;            
+  width: 120vh;
+} 
+
+.analytics-container {
+  background-color: rgb(255, 221, 255);
+  margin-right: 20vh;
+  width: 25vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  right: 0;
+}
+
+.controls {
+  margin-top: auto;
+  padding: 0px;
+  background-color: red;
+  display: inline-block;
+  border: 1px solid black;
+  border-radius: 15px;
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+  text-align: center;
+}
+
+#chat {
+  display: flex;
+  flex-direction: column;
+  flex: 3;
+  overflow-y: auto;
+  max-height: 66vh;     /* Limit height to 80% of viewport height */
+}
+.chat-card {
+  margin: 10px;
+  border-radius: 15px;
   padding: 20px;
-  margin: 50px;
+  width: 66.67%;  
+}
+
+.message-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.chat-card.user {
+  background-color: #A5D5FF;
+  align-self: flex-end;
+
+}
+
+.chat-card.assistant {
+  background-color: #FFE2A5;
+  align-self: flex-start;
+
+}
+
+.messag-body {
+  margin: 5px;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.scores {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.logger-container {
+  flex: 1; /* This makes it take up 1 part of the available space */
+  display: flex;
+  flex-direction: column;
+}
+
+.message-container {
+  flex: 2; /* This makes it take up 2 parts of the available space */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: 8px;
+  border-top: 1px solid transparent;  /* Add this line */
+}
+
+ /* Scrollable container */
+.message-container {
+  overflow-y: auto;
+  padding: 0 15px;
+} 
+
+/* Add this to your App.css */
+.glimmer-text {
+  position: relative;
+  display: inline-block;
+}
+
+.glimmer-text:hover {
+  background: linear-gradient(
+    120deg,
+    #000000 0%,
+    #444444 28%,
+    #ffffff 50%,
+    #444444 72%,
+    #000000 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 2.4s linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.section-card {
+  padding: 10px 105px 10px 105px;
+  margin-bottom: 50px;
+  margin-top: 50px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-top: 0.5px solid #000; 
+  border-bottom: 0.5px solid #000; 
+}
+
+.background-container {
+  position: relative;
+  width: 100%;
+  height: 90vh;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.background-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.overlay-container {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  background-color: rgba(0, 53, 107, 0.80);
+  color: white;
+  padding: 20px;
+  border-radius: 0px 5px 5px 0px;
+  width: 110vh;
+  height: 20vh;
 }
 
 .section-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0px 12px rgba(0, 0, 0, 0.15);
+}
+
+.team-container {
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: .5vh;
 }
 
 .team-member-img {
-  width: clamp(100px, 10vw, 300px);  /* Responsive width between 50px and 75px */
-  height: auto;                    /* Maintain aspect ratio */
-  aspect-ratio: 1 / 1;            /* Ensure square shape */
-  border-radius: 50%;             /* Circular shape */
-  object-fit: cover;              /* Maintain image proportion while filling container */
+  width: clamp(100px, 10vw, 300px);
+  height: auto;              
+  justify-content: center;
+  aspect-ratio: 1 / 1;            
+  border-radius: 50%;             
+  object-fit: cover;              
 }
 
 .centered-button-container {
   display: flex;
-  margin-top: 350px;
   padding: 0;
   justify-content: center;
   align-items: center;
-  height: 100vh; 
+  height: 20vh; 
   width: 100%;
 }
 
-/* Container for the info icon and tooltip */
 .info-container {
-  padding-top: 10px;
-  position: absolute;     
-  bottom: 70%;             
-  left: 50%;               
-  display: inline-block; 
-}  
+  position: relative;
+  /* margin-bottom: 20px; */
+  margin-top: 20vh;
+  text-align: center;
+}
 
-/* Style for the info icon */
 .info-icon {
-  font-size: 2rem;  /* Adjust the size */
+  font-size: 2rem;
   cursor: pointer;
-  right: 50%;               
-  /* padding-top: 10px; */
-  position: relative;    /* Position the tooltip above the icon */
-  /* height: 80vh; */
-  color: #007bff; /* Change this to any color you prefer */
+  color: #007bff;
 }
 
-/* Tooltip text styling */
 .tooltip-text {
-  visibility: hidden;   /* Hidden by default */
-  width: 400px;          /* Set a fixed width for the tooltip */
-  background-color: rgba(0, 0, 0, 0.75);  /* Dark background */
-  color: #ffffff;           /* White text */
-  text-align: center;    /* Centered text */
-  padding: 5px;          /* Add some padding around the text */
-  border-radius: 5px;    /* Rounded corners */
-  position: absolute;    /* Position the tooltip above the icon */
-  z-index: 1;            /* Ensure the tooltip is on top */
-  bottom: 100%;          /* Place the tooltip above the icon */
-  left: 50%;             /* Center the tooltip horizontally */
-  transform: translateX(-50%); /* Adjust for perfect centering */
-  opacity: 0;           /* Make it invisible by default */
-  transition: opacity 0.3s; /* Fade effect */
+  visibility: hidden;
+  width: 400px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-/* Show tooltip when hovering over the icon */
 .info-container:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
 }
 
+.arrow-container {
+  /* margin-top: 20px; */
+  text-align: center;
+}
+
 .elapsed-time {
-  margin-top: 10px;  
+  margin-top: 10px;
+  align-items: center;
+  justify-content: center;  
   font-size: 1rem;   
-  color: #333;      
+  color: #333;
+  display: flex;
+  padding: 0;
 }
