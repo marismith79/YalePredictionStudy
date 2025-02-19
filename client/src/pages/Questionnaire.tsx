@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 
-const apiUrl = process.env.VITE_API_URL;
+const apiUrl = `https://yalepredictionsurvey.azurewebsites.net/`;
 
 export default function Questionnaire() {
   const [yesorno, setYesorno] = useState("");

@@ -9,7 +9,7 @@ import {
   MimeType,
 } from "hume";
 
-const apiUrl = process.env.VITE_API_URL;
+const apiUrl = `https://yalepredictionsurvey.azurewebsites.net`;
 
 // Define types for your store state
 interface HumeState {
