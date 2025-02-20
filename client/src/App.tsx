@@ -5,6 +5,7 @@ import Chat from "./pages/Chat";
 import Login from "./pages/Login";
 import Questionnaire from "./pages/Questionnaire";
 import About from "./pages/About";
+import Completion from "./pages/Completion";
 import { Header } from "./components/Header";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         {() => (isAuthenticated() ? <Questionnaire /> : <Redirect to="/" />)}
       </Route>
       <Route path="/about" component={About} />
+      <Route path="/completion" component={Completion} />
     </div>
   );
 }

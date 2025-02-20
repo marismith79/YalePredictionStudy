@@ -74,8 +74,6 @@ app.get("/api/getHumeAccessToken", async (req: Request, res: Response) => {
   }
 });
 
-const VALID_PROLIFIC_IDS = ["1234567890", "0987654321"]; // Replace with your own list
-
 // Middleware to verify JWT on protected endpoints
 const authenticate = (req: Request, res: Response, next: Function) => {
   const authHeader = req.headers.authorization;
@@ -90,12 +88,10 @@ const authenticate = (req: Request, res: Response, next: Function) => {
 
 app.post("/api/login", (req: Request, res: Response) => {
   const { prolificId } = req.body;
-  if (!prolificId || !/^\d{10}$/.test(prolificId)) {
+  if (!prolificId || !/^[a-z0-9]{24}$/.test(prolificId)) {
     return res.status(400).json({ error: "Invalid Prolific ID format" });
   }
-  if (!VALID_PROLIFIC_IDS.includes(prolificId)) {
-    return res.status(401).json({ error: "Unauthorized Prolific ID" });
-  }
+
   // Issue a JWT for our app (JWT_SECRET should be set in .env)
   const token = jwt.sign({ prolificId }, process.env.JWT_SECRET || "secret", { expiresIn: "1h" });
   res.json({ token });

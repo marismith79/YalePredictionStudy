@@ -41,7 +41,7 @@ const Login: React.FC = () => {
             type="text"
             value={prolificId}
             onChange={e => setProlificId(e.target.value)}
-            placeholder="Enter 10-digit ID"
+            placeholder="Enter 24-digit ID"
           />
         </label>
         <button type="submit">Login</button>

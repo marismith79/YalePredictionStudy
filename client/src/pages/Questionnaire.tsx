@@ -44,7 +44,6 @@ export default function Questionnaire() {
       setError("Please select yes or no.");
       return;
     }
-    // Build CSV string
     const csvData =
       `YesorNo,${yesorno}\n` +
       `Diagnosis,${diagnosis.join(";")}\n` +
@@ -54,10 +53,9 @@ export default function Questionnaire() {
       `Delusions,${symptoms.delusions}\n` +
       `Suspiciousness,${symptoms.suspiciousness}\n` +
       `Anger,${symptoms.anger}\n`;
-
-    // Retrieve the token (prolific ID is determined on the backend via JWT)
+  
     const token = localStorage.getItem("token");
-
+  
     try {
       const response = await fetch(`${apiUrl}/api/upload-questionnaire`, {
         method: "POST",
@@ -66,12 +64,11 @@ export default function Questionnaire() {
           "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
-          responses: csvData,
-          // File name will be generated on the backend
+          responses: csvData
         }),
       });
       if (response.ok) {
-        setLocation("/");
+        setLocation("/completion");
       } else {
         setError("Failed to submit questionnaire.");
       }
@@ -80,10 +77,10 @@ export default function Questionnaire() {
       console.error(err);
     }
   };
-
+  
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Questionnaire</h2>
+      <h2 className="page-header" >Questionnaire:</h2>
       <h3>General</h3>
       <form onSubmit={handleSubmit}>
         <div style={{ marginTop: "20px" }}>
