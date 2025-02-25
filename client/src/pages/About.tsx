@@ -14,7 +14,6 @@ export default function About() {
         <img src={image3} alt="Background" />
         <div className="overlay-container">
           <h1 className="company-slogan"> Help us Advance the Future of Crisis Care!</h1>
-          <h3 className="company-sub-slogan">Join the study using NLP to predict psychosis relapse</h3>
         </div>
       </div>
       <section className="section-card">

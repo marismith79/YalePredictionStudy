@@ -259,8 +259,7 @@ class HumeService {
       
       // Retrieve token and prolificId (if available)
       const token = localStorage.getItem("token");
-      const prolificId = localStorage.getItem("prolificId") || "unknown";
-      const fileName = `${prolificId}-${Date.now()}.wav`;
+      const recordedDuration = localStorage.getItem("elapsedTime") || "0";
       
       // Send the concatenated recording to the backend for upload to Blob Storage
       const response = await fetch(`${apiUrl}/api/upload-audio`, {
@@ -271,7 +270,7 @@ class HumeService {
         },
         body: JSON.stringify({
           audioData: encodedCompleteAudio,
-          fileName: fileName,
+          recordedDuration: recordedDuration,
         }),
       });
       

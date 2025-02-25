@@ -99,16 +99,17 @@ app.post("/api/login", (req: Request, res: Response) => {
 
 app.post("/api/upload-audio", authenticate, async (req: Request, res: Response) => {
   try {
-    const { audioData } = req.body;
+    const { audioData, recordedDuration } = req.body;
     const user = (req as any).user;
     const prolificId = user.prolificId;
-    const fileName = `${prolificId}-1.wav`;
-
+    const fileName = `audio-${prolificId}-${recordedDuration}s-1.wav`;
     const buffer = Buffer.from(audioData, "base64");
 
     // Get connection string and container name from environment variables
     const blobConnectionString = process.env.BLOB_CONNECTION_STRING || "UseDevelopmentStorage=true";
     const containerName = process.env.BLOB_CONTAINER || "interviews + questionnaires";
+    // const containerName = "recordings";
+
 
     // Create a BlobServiceClient
     const blobServiceClient = BlobServiceClient.fromConnectionString(blobConnectionString);
@@ -138,10 +139,11 @@ app.post("/api/upload-questionnaire", authenticate, async (req: Request, res: Re
     const { responses } = req.body; 
     const user = (req as any).user;
     const prolificId = user.prolificId;
-    const finalFileName = `${prolificId}-questionnaire.csv`;
+    const finalFileName = `survey-${prolificId}-1.csv`;
     const buffer = Buffer.from(responses, "utf-8");
     const blobConnectionString = process.env.BLOB_CONNECTION_STRING || "UseDevelopmentStorage=true";
-    const containerName = process.env.BLOB_CONTAINER || "recordings"; 
+    const containerName = process.env.BLOB_CONTAINER || "interviews + questionnaires"; 
+    // const containerName = "recordings";
 
     const blobServiceClient = BlobServiceClient.fromConnectionString(blobConnectionString);
     const containerClient = blobServiceClient.getContainerClient(containerName);

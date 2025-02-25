@@ -38,15 +38,10 @@
 }
 
 .company-slogan {
-  font-size: calc(14px + 3vmin);
+  font-size: calc(11px + 3vmin);
   text-align: center;
   color: rgb(255, 255, 255);
-  margin-top: 5vh;
-}
-
-.company-sub-slogan {
-  color: rgb(255, 255, 255);
-  margin-left: 10vh;
+  margin-top: 3%;
 }
 
 .App-logo {
@@ -97,8 +92,7 @@
 }
 
 .Header1 {
-  flex: 1;
-  height: 10vh;
+  height: 10%;
   width: 50%;
   padding: 0 7%;
   font-weight: 1000;
@@ -109,7 +103,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 10vh;
+  margin: 0;
+  margin-top: 1.5%;
   color:rgb(255, 255, 255)
 }
 
@@ -117,13 +112,15 @@
   flex: 2;
   height: 10vh;
   width: 50%;
-  padding: 0 7%;
-  text-align: right;
-  align-items: right;
+  padding: 1.5% 2% 0% 0%;
+  /* text-align: right; */
+  /* align-items: right; */
+  flex-direction: row;
   list-style: none;
   font-size: calc(10px + 2vmin);
   color: rgb(255, 255, 255);
   justify-content: right;
+  margin-bottom: 1%;
 }
 
 .nav {
@@ -168,51 +165,6 @@ button:focus{
   position: relative;
 }
 
-/* Ensure chat-container and analytics-container are the same height */
-.chat-container, .analytics-container{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 50vh; 
-  margin-top: 1vh;
-  margin-bottom: 1vh;
-  border-radius: 21px;
-  border: 0.5px solid #8f8f8f;
-}
-
-/* Styling for sentiment-container */
-.sentiment-container {
-  background-color: #f0f0f0;
-  padding: 2vh;
-  margin-top: 5vh;
-  margin-left: 20vh;
-  margin-right: 20vh;
-  height: 20vh;
-  border: 1px solid #8f8f8f;
-  border-radius: 21px;
-}
-
-.chat-container {
-  background-color: #fefefe;
-  margin-left: 20vh; 
-  display: flex;
-  position: relative;
-  justify-content: center;  
-  align-items: center;            
-  width: 120vh;
-} 
-
-.analytics-container {
-  background-color: rgb(255, 221, 255);
-  margin-right: 20vh;
-  width: 25vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: absolute;
-  right: 0;
-}
-
 .controls {
   margin-top: auto;
   padding: 0px;
@@ -226,18 +178,20 @@ button:focus{
   text-align: center;
 }
 
+.chat-container {
+  display: flex;
+  height: 100%;
+  justify-content: center;  
+  align-items: center;
+  flex-direction: column;         
+}
+
 #chat {
   display: flex;
   flex-direction: column;
   flex: 3;
   overflow-y: auto;
   max-height: 66vh;     /* Limit height to 80% of viewport height */
-}
-.chat-card {
-  margin: 10px;
-  border-radius: 15px;
-  padding: 20px;
-  width: 66.67%;  
 }
 
 .message-header {
@@ -315,7 +269,7 @@ button:focus{
   color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
-  animation: shine 2.4s linear infinite;
+  animation: shine 3s linear infinite;
 }
 
 @keyframes shine {
@@ -324,8 +278,46 @@ button:focus{
   }
 }
 
+@media only screen and (max-width: 600px) {
+  .Header1 {
+    flex: 1;
+    margin-top: 1.5%;
+    color:rgb(255, 255, 255)
+  }
+
+  .Header2 {
+    flex: 2;
+    padding: 1.5% 0% 0% 1%;
+    margin: 0%;
+    color:rgb(255, 255, 255)
+  }
+  
+  .section-card {
+    padding: 0% 7% 0% 7%;
+    margin-bottom: 50px;
+    margin-top: 50px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-top: 0.5px solid #000; 
+    border-bottom: 0.5px solid #000; 
+  }
+
+  .section-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .company-slogan {
+    font-size: calc(6px + 2vmin);
+    margin-top: 2%;
+  }
+  .overlay-container {
+    width: 80%; /* Adjust as needed for mobile */
+    height: 100%; /* Let content dictate height */
+  }
+}
+
 .section-card {
-  padding: 10px 105px 10px 105px;
+  padding: 0% 7% 0% 7%;
   margin-bottom: 50px;
   margin-top: 50px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -336,7 +328,7 @@ button:focus{
 .background-container {
   position: relative;
   width: 100%;
-  height: 90vh;
+  height: 100%;
   overflow: hidden;
   margin-bottom: 20px;
 }
@@ -356,8 +348,15 @@ button:focus{
   color: white;
   padding: 20px;
   border-radius: 0px 5px 5px 0px;
-  width: 110vh;
-  height: 20vh;
+  width: 55%;
+  height: 20%;
+}
+
+.login-form {
+  display: "flex";
+  justify-content: center;
+  align-items: "center";
+  flex-direction: "column";
 }
 
 .section-card:hover {

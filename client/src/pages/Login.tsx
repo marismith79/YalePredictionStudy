@@ -44,7 +44,7 @@ const Login: React.FC = () => {
             placeholder="Enter 24-digit ID"
           />
         </label>
-        <button type="submit">Login</button>
+        <button type="submit" style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }}>Login</button>
       </form>
       { error && <p style={{ color: "red" }}>{error}</p> }
     </div>
