@@ -17,11 +17,11 @@ export function Header() {
               Login
             </Button>
           </Link>
-          <Link href="/about">
+            <a href="https://relapsepredictionstudy.yale.edu/" target="_blank" rel="noopener noreferrer">
             <Button className="company-name">
               About
             </Button>
-          </Link>
+            </a>
         </nav>
       </div>
     </header>
